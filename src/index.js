@@ -1,5 +1,5 @@
 import {fromEvent} from 'rxjs';
-import {map, pairwise, switchMap} from 'rxjs/operators'
+import {map, pairwise, switchMap, takeUntil} from 'rxjs/operators'
 
 
 const canvas = document.querySelector('canvas');
@@ -15,6 +15,7 @@ ctx.scale(scale, scale);
 
 const mouseMove$ = fromEvent(canvas, 'mousemove');
 const mouseDown$ = fromEvent(canvas, 'mousedown');
+const mouseUp$ = fromEvent(canvas, 'mouseup');
 
 const stream$ = mouseDown$
     .pipe(
@@ -25,9 +26,10 @@ const stream$ = mouseDown$
                     x: e.offsetX,
                     y: e.offsetY,
                 })),
-                pairwise()
+                pairwise(),
+                takeUntil(mouseUp$)
             )
-        })
+        }),
     )
 
 stream$.subscribe(([from, to]) => {
